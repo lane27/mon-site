@@ -1,4 +1,4 @@
-name: mdBook build and deploy to GitHub Pages
+name: mdBook build (with plugins) and deploy to GitHub Pages
 
 on:
   push:
@@ -21,11 +21,41 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo registry and bin
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-mdbook-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-mdbook-
+
       - name: Install mdBook 0.5.9
-        run: cargo install mdbook --version 0.5.9
+        run: cargo install mdbook --version 0.5.9 --locked
+
+      - name: Install common mdBook plugins
+        run: |
+          cargo install mdbook-mermaid --locked || true
+          cargo install mdbook-katex --locked || true
+          cargo install mdbook-linkcheck --locked || true
+          cargo install mdbook-toc --locked || true
+          cargo install mdbook-plantuml --locked || true
+          cargo install mdbook-variables --locked || true
+
+      - name: Verify installed tools
+        run: |
+          mdbook --version
+          which mdbook-mermaid || true
+          which mdbook-katex || true
+          which mdbook-linkcheck || true
+          which mdbook-toc || true
+          which mdbook-plantuml || true
+          which mdbook-variables || true
 
       - name: Build mdBook site
-        run: mdbook build
+        run: mdbook build --dest-dir book
 
       - name: Ensure CNAME for custom domain
         run: |
