@@ -1,0 +1,6 @@
+title = "Mon site mdBook"
+author = "lane27"
+language = "fr"
+
+[output.html]
+# options can be added here
