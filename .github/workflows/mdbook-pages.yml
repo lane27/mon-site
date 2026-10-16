@@ -46,12 +46,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mdbook-bin-
 
-      - name: Install mdBook from GitHub release
+      - name: Install mdBook from GitHub release with cargo fallback
         run: |
           set -euxo pipefail
-          curl -L "https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mdbook.tar.gz
-          tar -xzf /tmp/mdbook.tar.gz -C /tmp
-          sudo install /tmp/mdbook /usr/local/bin/mdbook
+          URL="https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-x86_64-unknown-linux-gnu.tar.gz"
+          if curl -fL "$URL" -o /tmp/mdbook.tar.gz; then
+            if tar -tzf /tmp/mdbook.tar.gz >/dev/null 2>&1; then
+              tar -xzf /tmp/mdbook.tar.gz -C /tmp
+              sudo install /tmp/mdbook /usr/local/bin/mdbook
+            else
+              echo "Downloaded file is not a valid tar.gz, falling back to cargo install"
+              cargo install mdbook --version 0.5.9 --locked
+            fi
+          else
+            echo "Download failed, falling back to cargo install"
+            cargo install mdbook --version 0.5.9 --locked
+          fi
           mdbook --version
 
       - name: Install mdBook plugin binaries from GitHub releases (with cargo fallback)
@@ -68,7 +78,6 @@ jobs:
             if curl -fL "$asset_url" -o "/tmp/${binary_name}.tar.gz"; then
               mkdir -p "/tmp/${binary_name}"
               if tar -xzf "/tmp/${binary_name}.tar.gz" -C "/tmp/${binary_name}"; then
-                # try to find the binary inside extracted files
                 candidate=$(find "/tmp/${binary_name}" -type f -name "${binary_name}" -perm -111 | head -n1 || true)
                 if [ -n "$candidate" ]; then
                   sudo install "$candidate" "/usr/local/bin/${binary_name}"
@@ -89,22 +98,11 @@ jobs:
             cargo install "${crate_name}" --locked || true
           }
 
-          # mdbook-mermaid
           install_or_fallback "mdbook-mermaid" "mdbook-mermaid" "https://github.com/badboy/mdbook-mermaid/releases/latest/download/mdbook-mermaid-x86_64-unknown-linux-gnu.tar.gz"
-
-          # mdbook-katex
           install_or_fallback "mdbook-katex" "mdbook-katex" "https://github.com/lervag/mdbook-katex/releases/latest/download/mdbook-katex-x86_64-unknown-linux-gnu.tar.gz"
-
-          # mdbook-linkcheck
           install_or_fallback "mdbook-linkcheck" "mdbook-linkcheck" "https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/latest/download/mdbook-linkcheck-x86_64-unknown-linux-gnu.tar.gz"
-
-          # mdbook-toc
           install_or_fallback "mdbook-toc" "mdbook-toc" "https://github.com/badboy/mdbook-toc/releases/latest/download/mdbook-toc-x86_64-unknown-linux-gnu.tar.gz"
-
-          # mdbook-plantuml
           install_or_fallback "mdbook-plantuml" "mdbook-plantuml" "https://github.com/plantuml-mdbook/mdbook-plantuml/releases/latest/download/mdbook-plantuml-x86_64-unknown-linux-gnu.tar.gz"
-
-          # mdbook-variables
           install_or_fallback "mdbook-variables" "mdbook-variables" "https://github.com/arkworks-rs/mdbook-variables/releases/latest/download/mdbook-variables-x86_64-unknown-linux-gnu.tar.gz"
 
       - name: Verify plugin binaries
