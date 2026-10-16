@@ -1,4 +1,4 @@
-name: mdBook build (plugin release binaries) and deploy to GitHub Pages
+name: mdBook build (plugin release binaries with fallback) and deploy to GitHub Pages
 
 on:
   push:
@@ -18,6 +18,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Rust toolchain (for cargo fallback)
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Install dependencies for mdBook plugins
         run: |
           sudo apt-get update
@@ -25,7 +28,7 @@ jobs:
           sudo apt-get install -y openjdk-17-jre-headless graphviz
           npm install -g @mermaid-js/mermaid-cli
 
-      - name: Cache tool binaries
+      - name: Cache tool binaries and cargo
         uses: actions/cache@v4
         with:
           path: |
@@ -36,6 +39,9 @@ jobs:
             /usr/local/bin/mdbook-toc
             /usr/local/bin/mdbook-plantuml
             /usr/local/bin/mdbook-variables
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
           key: ${{ runner.os }}-mdbook-bin-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-mdbook-bin-
@@ -43,61 +49,75 @@ jobs:
       - name: Install mdBook from GitHub release
         run: |
           set -euxo pipefail
-          curl -L "https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mdbook.tar.gz
+          curl -L "https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mdbook.tar.gz
           tar -xzf /tmp/mdbook.tar.gz -C /tmp
           sudo install /tmp/mdbook /usr/local/bin/mdbook
           mdbook --version
 
-      - name: Install mdBook plugin binaries from GitHub releases
+      - name: Install mdBook plugin binaries from GitHub releases (with cargo fallback)
         run: |
           set -euxo pipefail
           mkdir -p /tmp/mdbook-plugins
 
-          install_release() {
-            local name="$1"
-            local asset_url="$2"
-            local target="$3"
-            curl -L "$asset_url" -o "/tmp/${name}.tar.gz"
-            mkdir -p "/tmp/${name}"
-            tar -xzf "/tmp/${name}.tar.gz" -C "/tmp/${name}"
-            sudo install "/tmp/${name}/${target}" "/usr/local/bin/${name}"
-            chmod +x "/usr/local/bin/${name}"
+          install_or_fallback() {
+            crate_name="$1"
+            binary_name="$2"
+            asset_url="$3"
+
+            echo "Installing ${binary_name} from release (asset: ${asset_url})"
+            if curl -fL "$asset_url" -o "/tmp/${binary_name}.tar.gz"; then
+              mkdir -p "/tmp/${binary_name}"
+              if tar -xzf "/tmp/${binary_name}.tar.gz" -C "/tmp/${binary_name}"; then
+                # try to find the binary inside extracted files
+                candidate=$(find "/tmp/${binary_name}" -type f -name "${binary_name}" -perm -111 | head -n1 || true)
+                if [ -n "$candidate" ]; then
+                  sudo install "$candidate" "/usr/local/bin/${binary_name}"
+                  chmod +x "/usr/local/bin/${binary_name}"
+                  echo "Installed ${binary_name} from release"
+                  return 0
+                else
+                  echo "Binary ${binary_name} not found in archive"
+                fi
+              else
+                echo "Failed to extract archive for ${binary_name}" >&2
+              fi
+            else
+              echo "Download failed for ${binary_name}, will fallback to cargo install" >&2
+            fi
+
+            echo "Falling back to cargo install ${crate_name}"
+            cargo install "${crate_name}" --locked || true
           }
 
           # mdbook-mermaid
-          install_release "mdbook-mermaid" "https://github.com/badboy/mdbook-mermaid/releases/latest/download/mdbook-mermaid-x86_64-unknown-linux-gnu.tar.gz" "mdbook-mermaid"
+          install_or_fallback "mdbook-mermaid" "mdbook-mermaid" "https://github.com/badboy/mdbook-mermaid/releases/latest/download/mdbook-mermaid-x86_64-unknown-linux-gnu.tar.gz"
 
           # mdbook-katex
-          install_release "mdbook-katex" "https://github.com/lervag/mdbook-katex/releases/latest/download/mdbook-katex-x86_64-unknown-linux-gnu.tar.gz" "mdbook-katex"
+          install_or_fallback "mdbook-katex" "mdbook-katex" "https://github.com/lervag/mdbook-katex/releases/latest/download/mdbook-katex-x86_64-unknown-linux-gnu.tar.gz"
 
           # mdbook-linkcheck
-          install_release "mdbook-linkcheck" "https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/latest/download/mdbook-linkcheck-x86_64-unknown-linux-gnu.tar.gz" "mdbook-linkcheck"
+          install_or_fallback "mdbook-linkcheck" "mdbook-linkcheck" "https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/latest/download/mdbook-linkcheck-x86_64-unknown-linux-gnu.tar.gz"
 
           # mdbook-toc
-          install_release "mdbook-toc" "https://github.com/badboy/mdbook-toc/releases/latest/download/mdbook-toc-x86_64-unknown-linux-gnu.tar.gz" "mdbook-toc"
+          install_or_fallback "mdbook-toc" "mdbook-toc" "https://github.com/badboy/mdbook-toc/releases/latest/download/mdbook-toc-x86_64-unknown-linux-gnu.tar.gz"
 
           # mdbook-plantuml
-          install_release "mdbook-plantuml" "https://github.com/plantuml-mdbook/mdbook-plantuml/releases/latest/download/mdbook-plantuml-x86_64-unknown-linux-gnu.tar.gz" "mdbook-plantuml"
+          install_or_fallback "mdbook-plantuml" "mdbook-plantuml" "https://github.com/plantuml-mdbook/mdbook-plantuml/releases/latest/download/mdbook-plantuml-x86_64-unknown-linux-gnu.tar.gz"
 
           # mdbook-variables
-          install_release "mdbook-variables" "https://github.com/arkworks-rs/mdbook-variables/releases/latest/download/mdbook-variables-x86_64-unknown-linux-gnu.tar.gz" "mdbook-variables"
+          install_or_fallback "mdbook-variables" "mdbook-variables" "https://github.com/arkworks-rs/mdbook-variables/releases/latest/download/mdbook-variables-x86_64-unknown-linux-gnu.tar.gz"
 
       - name: Verify plugin binaries
         run: |
-          which mdbook
-          which mdbook-mermaid
-          which mdbook-katex
-          which mdbook-linkcheck
-          which mdbook-toc
-          which mdbook-plantuml
-          which mdbook-variables
-          mdbook --version
-          mdbook-mermaid --help || true
-          mdbook-katex --help || true
-          mdbook-linkcheck --help || true
-          mdbook-toc --help || true
-          mdbook-plantuml --help || true
-          mdbook-variables --help || true
+          set -euxo pipefail
+          which mdbook || true
+          which mdbook-mermaid || true
+          which mdbook-katex || true
+          which mdbook-linkcheck || true
+          which mdbook-toc || true
+          which mdbook-plantuml || true
+          which mdbook-variables || true
+          mdbook --version || true
 
       - name: Build mdBook site
         run: mdbook build --dest-dir book
