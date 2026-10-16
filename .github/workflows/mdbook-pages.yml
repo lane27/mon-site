@@ -1,4 +1,4 @@
-name: mdBook build (with plugins) and deploy to GitHub Pages
+name: mdBook build (plugin release binaries) and deploy to GitHub Pages
 
 on:
   push:
@@ -18,41 +18,86 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies for mdBook plugins
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl tar unzip ca-certificates jq
+          sudo apt-get install -y openjdk-17-jre-headless graphviz
+          npm install -g @mermaid-js/mermaid-cli
 
-      - name: Cache cargo registry and bin
+      - name: Cache tool binaries
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-mdbook-${{ hashFiles('**/Cargo.lock') }}
+            /usr/local/bin/mdbook
+            /usr/local/bin/mdbook-mermaid
+            /usr/local/bin/mdbook-katex
+            /usr/local/bin/mdbook-linkcheck
+            /usr/local/bin/mdbook-toc
+            /usr/local/bin/mdbook-plantuml
+            /usr/local/bin/mdbook-variables
+          key: ${{ runner.os }}-mdbook-bin-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cargo-mdbook-
+            ${{ runner.os }}-mdbook-bin-
 
-      - name: Install mdBook 0.5.9
-        run: cargo install mdbook --version 0.5.9 --locked
-
-      - name: Install common mdBook plugins
+      - name: Install mdBook from GitHub release
         run: |
-          cargo install mdbook-mermaid --locked || true
-          cargo install mdbook-katex --locked || true
-          cargo install mdbook-linkcheck --locked || true
-          cargo install mdbook-toc --locked || true
-          cargo install mdbook-plantuml --locked || true
-          cargo install mdbook-variables --locked || true
-
-      - name: Verify installed tools
-        run: |
+          set -euxo pipefail
+          curl -L "https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/mdbook.tar.gz
+          tar -xzf /tmp/mdbook.tar.gz -C /tmp
+          sudo install /tmp/mdbook /usr/local/bin/mdbook
           mdbook --version
-          which mdbook-mermaid || true
-          which mdbook-katex || true
-          which mdbook-linkcheck || true
-          which mdbook-toc || true
-          which mdbook-plantuml || true
-          which mdbook-variables || true
+
+      - name: Install mdBook plugin binaries from GitHub releases
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/mdbook-plugins
+
+          install_release() {
+            local name="$1"
+            local asset_url="$2"
+            local target="$3"
+            curl -L "$asset_url" -o "/tmp/${name}.tar.gz"
+            mkdir -p "/tmp/${name}"
+            tar -xzf "/tmp/${name}.tar.gz" -C "/tmp/${name}"
+            sudo install "/tmp/${name}/${target}" "/usr/local/bin/${name}"
+            chmod +x "/usr/local/bin/${name}"
+          }
+
+          # mdbook-mermaid
+          install_release "mdbook-mermaid" "https://github.com/badboy/mdbook-mermaid/releases/latest/download/mdbook-mermaid-x86_64-unknown-linux-gnu.tar.gz" "mdbook-mermaid"
+
+          # mdbook-katex
+          install_release "mdbook-katex" "https://github.com/lervag/mdbook-katex/releases/latest/download/mdbook-katex-x86_64-unknown-linux-gnu.tar.gz" "mdbook-katex"
+
+          # mdbook-linkcheck
+          install_release "mdbook-linkcheck" "https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/latest/download/mdbook-linkcheck-x86_64-unknown-linux-gnu.tar.gz" "mdbook-linkcheck"
+
+          # mdbook-toc
+          install_release "mdbook-toc" "https://github.com/badboy/mdbook-toc/releases/latest/download/mdbook-toc-x86_64-unknown-linux-gnu.tar.gz" "mdbook-toc"
+
+          # mdbook-plantuml
+          install_release "mdbook-plantuml" "https://github.com/plantuml-mdbook/mdbook-plantuml/releases/latest/download/mdbook-plantuml-x86_64-unknown-linux-gnu.tar.gz" "mdbook-plantuml"
+
+          # mdbook-variables
+          install_release "mdbook-variables" "https://github.com/arkworks-rs/mdbook-variables/releases/latest/download/mdbook-variables-x86_64-unknown-linux-gnu.tar.gz" "mdbook-variables"
+
+      - name: Verify plugin binaries
+        run: |
+          which mdbook
+          which mdbook-mermaid
+          which mdbook-katex
+          which mdbook-linkcheck
+          which mdbook-toc
+          which mdbook-plantuml
+          which mdbook-variables
+          mdbook --version
+          mdbook-mermaid --help || true
+          mdbook-katex --help || true
+          mdbook-linkcheck --help || true
+          mdbook-toc --help || true
+          mdbook-plantuml --help || true
+          mdbook-variables --help || true
 
       - name: Build mdBook site
         run: mdbook build --dest-dir book
@@ -61,15 +106,6 @@ jobs:
         run: |
           mkdir -p book
           echo 'doc.example.com' > book/CNAME
-
-      - name: Create ZIP artifact
-        run: zip -r mdbook-site.zip book
-
-      - name: Upload ZIP artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mdbook-site
-          path: ./mdbook-site.zip
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
