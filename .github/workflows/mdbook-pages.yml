@@ -115,11 +115,6 @@ jobs:
       - name: Build mdBook site
         run: mdbook build --dest-dir book
 
-      - name: Ensure CNAME for custom domain
-        run: |
-          mkdir -p book
-          echo 'doc.example.com' > book/CNAME
-
       - name: Upload site artifact
         uses: actions/upload-artifact@v4
         with:
