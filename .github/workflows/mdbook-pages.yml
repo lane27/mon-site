@@ -51,11 +51,11 @@ jobs:
               sudo install /tmp/mdbook /usr/local/bin/mdbook
             else
               echo "Downloaded file is not a valid tar.gz, falling back to cargo install"
-              cargo install mdbook --version 0.5.9 --locked
+              cargo install mdbook --locked
             fi
           else
             echo "Download failed, falling back to cargo install"
-            cargo install mdbook --version 0.5.9 --locked
+            cargo install mdbook --locked
           fi
           mdbook --version
 
