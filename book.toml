@@ -1,5 +1,6 @@
+[book]
 title = "Mon site mdBook"
-author = "lane27"
+authors = ["lane27"]
 language = "fr"
 
 [output.html]
