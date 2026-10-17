@@ -38,6 +38,9 @@ jobs:
       # 3. Setup Official GitHub Pages environment
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 4. Upload build artifact
       - name: Upload artifact
