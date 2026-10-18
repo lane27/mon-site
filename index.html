@@ -1,12 +1,157 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mon Site</title>
+    <style>
+      :root {
+        --bg: #f7fbff;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --accent: #2563eb;
+        --accent-strong: #1d4ed8;
+        --border: #e6edf8;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        background: linear-gradient(180deg, #f0f6ff 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      main { max-width: 1100px; margin: 0 auto; padding: 60px 20px 100px; }
+
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 34px; box-shadow: 0 20px 50px rgba(30,58,138,0.06); }
+
+      .hero { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: center; }
+
+      .meta { color: var(--muted); font-weight: 600; letter-spacing: 0.06em; font-size: 0.8rem; text-transform: uppercase; background: #eff6ff; padding: 8px 12px; border-radius: 999px; display: inline-block; }
+
+      h1 { margin: 10px 0 6px; font-size: clamp(2rem, 4.5vw, 3.2rem); }
+
+      p.lead { margin: 0 0 18px; color: var(--muted); font-size: 1.05rem; }
+
+      .photo {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+        display: grid;
+        place-items: center;
+      }
+
+      .avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 6px solid white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        object-fit: cover;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .cta.secondary { background: transparent; color: var(--accent-strong); border: 1px solid var(--border); padding: 10px 14px; font-weight: 600; }
+
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 26px; }
+
+      .box { background: #fbfeff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+
+      .skills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+      .skill { background: #eef6ff; color: var(--accent-strong); padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; }
+
+      .contact-list { list-style: none; padding: 0; margin: 8px 0 0; }
+
+      .contact-list li { margin-bottom: 8px; }
+
+      footer { margin-top: 28px; color: var(--muted); font-size: 0.95rem; border-top: 1px solid var(--border); padding-top: 16px; }
+
+      @media (max-width: 880px) {
+        .hero { grid-template-columns: 1fr; }
+        .photo { order: -1; }
+      }
+    </style>
   </head>
   <body>
-    <h1>Mon Site</h1>
-    <p>GitHub Pages is working.</p>
+    <main>
+      <section class="card">
+        <div class="meta">Bienvenue</div>
+        <div class="hero">
+          <div>
+            <h1>Mon Site — Portfolio</h1>
+            <p class="lead">Je présente ici des projets, des compétences et des moyens de contact. Ce site est hébergé via GitHub Pages et sert de vitrine simple et efficace.</p>
+
+            <a class="cta" href="#contact">Me contacter</a>
+            <a class="cta secondary" href="https://github.com/lane27" style="margin-left:12px">Voir mon GitHub</a>
+
+            <div class="grid" style="margin-top:28px">
+              <div class="box">
+                <h3>Résumé</h3>
+                <p>Développeur et créateur, j'aime construire des projets web clairs et utiles, expérimenter des idées et partager le résultat.</p>
+              </div>
+
+              <div class="box">
+                <h3>Derniers projets</h3>
+                <p>Exemples : petits outils, sites statiques, prototypes JavaScript et démonstrations UI.</p>
+              </div>
+
+              <div class="box">
+                <h3>Objectif</h3>
+                <p>Transformer ce site en portfolio complet et documenter mes projets techniques avec des démos et du code source.</p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="photo">
+            <!-- Utilise l'avatar GitHub comme photo de profil; remplacez si besoin -->
+            <img class="avatar" src="https://avatars.githubusercontent.com/u/27077742?v=4" alt="Photo profil" />
+            <div style="text-align:center;margin-top:12px;font-weight:700">lane27</div>
+            <div style="text-align:center;color:var(--muted);font-size:0.95rem">Développeur • Créateur</div>
+            <div style="text-align:center;margin-top:8px"><a href="https://linkedin.com/in/monprofil" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
+          </aside>
+        </div>
+
+        <section style="margin-top:28px">
+          <h2>Compétences</h2>
+          <div class="skills">
+            <span class="skill">HTML</span>
+            <span class="skill">CSS</span>
+            <span class="skill">JavaScript</span>
+            <span class="skill">Git</span>
+            <span class="skill">Node.js</span>
+            <span class="skill">Static sites</span>
+          </div>
+        </section>
+
+        <section id="contact" style="margin-top:22px">
+          <h2>Contact</h2>
+          <p>Pour me contacter ou voir mon travail :</p>
+          <ul class="contact-list">
+            <li>GitHub : <a href="https://github.com/lane27">github.com/lane27</a></li>
+            <li>PR ou issue sur ce dépôt pour proposer des modifications</li>
+          </ul>
+        </section>
+
+        <footer>
+          Cette version ajoute une photo, une section Compétences et un bouton d'appel à l'action pour faciliter le contact. Remplacez l'avatar par votre image si vous le souhaitez.
+        </footer>
+      </section>
+    </main>
   </body>
 </html>
