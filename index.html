@@ -6,189 +6,149 @@
     <title>Mon Site</title>
     <style>
       :root {
-        --bg: #f5f7fb;
+        --bg: #f7fbff;
         --card: #ffffff;
-        --text: #1f2937;
-        --muted: #4b5563;
+        --text: #0f172a;
+        --muted: #475569;
         --accent: #2563eb;
         --accent-strong: #1d4ed8;
-        --accent-soft: #dbeafe;
-        --border: #e5e7eb;
+        --border: #e6edf8;
       }
 
       * { box-sizing: border-box; }
 
       body {
         margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: linear-gradient(160deg, #eef5ff 0%, var(--bg) 100%);
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        background: linear-gradient(180deg, #f0f6ff 0%, var(--bg) 100%);
         color: var(--text);
-        line-height: 1.7;
+        line-height: 1.6;
       }
 
-      main {
-        max-width: 1000px;
+      main { max-width: 1100px; margin: 0 auto; padding: 60px 20px 100px; }
+
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 34px; box-shadow: 0 20px 50px rgba(30,58,138,0.06); }
+
+      .hero { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: center; }
+
+      .meta { color: var(--muted); font-weight: 600; letter-spacing: 0.06em; font-size: 0.8rem; text-transform: uppercase; background: #eff6ff; padding: 8px 12px; border-radius: 999px; display: inline-block; }
+
+      h1 { margin: 10px 0 6px; font-size: clamp(2rem, 4.5vw, 3.2rem); }
+
+      p.lead { margin: 0 0 18px; color: var(--muted); font-size: 1.05rem; }
+
+      .photo {
+        width: 100%;
+        max-width: 320px;
         margin: 0 auto;
-        padding: 60px 20px 80px;
+        display: grid;
+        place-items: center;
       }
 
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        box-shadow: 0 18px 40px rgba(37, 99, 235, 0.08);
-        padding: 32px;
+      .avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 6px solid white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        object-fit: cover;
       }
 
-      .eyebrow {
-        display: inline-block;
-        padding: 7px 12px;
-        border-radius: 999px;
-        background: var(--accent-soft);
-        color: var(--accent-strong);
-        font-size: 0.75rem;
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 12px;
         font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        margin: 18px 0 14px;
-        font-size: clamp(2.6rem, 6vw, 4.2rem);
-        line-height: 1.1;
-      }
-
-      h2 {
-        margin: 0 0 16px;
-        font-size: clamp(1.6rem, 3vw, 2.3rem);
-      }
-
-      p {
-        margin: 0 0 1rem;
-        color: var(--muted);
-        font-size: 1.06rem;
-      }
-
-      .hero {
-        display: grid;
-        grid-template-columns: 1.4fr 0.8fr;
-        gap: 20px;
-        align-items: center;
-      }
-
-      .hero-copy {
-        padding-right: 8px;
-      }
-
-      .badge {
-        display: inline-block;
-        margin-top: 12px;
-        padding: 10px 14px;
-        background: #f8fafc;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        color: var(--text);
-        font-weight: 600;
-      }
-
-      .illustration {
-        min-height: 220px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        font-size: 3rem;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-        margin-top: 28px;
-      }
-
-      .box {
-        background: #f8fafc;
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 20px;
-      }
-
-      .box h3 {
-        margin: 0 0 10px;
-        font-size: 1.2rem;
-      }
-
-      .box p {
-        margin: 0;
-      }
-
-      a {
-        color: var(--accent);
         text-decoration: none;
       }
 
-      a:hover {
-        text-decoration: underline;
-      }
+      .cta.secondary { background: transparent; color: var(--accent-strong); border: 1px solid var(--border); padding: 10px 14px; font-weight: 600; }
 
-      footer {
-        margin-top: 28px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-        color: var(--muted);
-        font-size: 0.95rem;
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 26px; }
+
+      .box { background: #fbfeff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+
+      .skills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+      .skill { background: #eef6ff; color: var(--accent-strong); padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; }
+
+      .contact-list { list-style: none; padding: 0; margin: 8px 0 0; }
+
+      .contact-list li { margin-bottom: 8px; }
+
+      footer { margin-top: 28px; color: var(--muted); font-size: 0.95rem; border-top: 1px solid var(--border); padding-top: 16px; }
+
+      @media (max-width: 880px) {
+        .hero { grid-template-columns: 1fr; }
+        .photo { order: -1; }
       }
     </style>
   </head>
   <body>
     <main>
       <section class="card">
-        <div class="eyebrow">Bienvenue</div>
-
+        <div class="meta">Bienvenue</div>
         <div class="hero">
-          <div class="hero-copy">
-            <h1>Mon Site</h1>
-            <p>
-              Un espace simple et moderne pour partager mes idées, mes projets
-              et mes passions, hébergé avec GitHub Pages.
-            </p>
-            <div class="badge">Portfolio • Projets • Contact</div>
+          <div>
+            <h1>Mon Site — Portfolio</h1>
+            <p class="lead">Je présente ici des projets, des compétences et des moyens de contact. Ce site est hébergé via GitHub Pages et sert de vitrine simple et efficace.</p>
+
+            <a class="cta" href="#contact">Me contacter</a>
+            <a class="cta secondary" href="https://github.com/lane27" style="margin-left:12px">Voir mon GitHub</a>
+
+            <div class="grid" style="margin-top:28px">
+              <div class="box">
+                <h3>Résumé</h3>
+                <p>Développeur et créateur, j'aime construire des projets web clairs et utiles, expérimenter des idées et partager le résultat.</p>
+              </div>
+
+              <div class="box">
+                <h3>Derniers projets</h3>
+                <p>Exemples : petits outils, sites statiques, prototypes JavaScript et démonstrations UI.</p>
+              </div>
+
+              <div class="box">
+                <h3>Objectif</h3>
+                <p>Transformer ce site en portfolio complet et documenter mes projets techniques avec des démos et du code source.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="illustration" aria-label="Illustration de site web">🌐</div>
+          <aside class="photo">
+            <!-- Utilise l'avatar GitHub comme photo de profil; remplacez si besoin -->
+            <img class="avatar" src="https://avatars.githubusercontent.com/u/27077742?v=4" alt="Photo profil" />
+            <div style="text-align:center;margin-top:12px;font-weight:700">lane27</div>
+            <div style="text-align:center;color:var(--muted);font-size:0.95rem">Développeur • Créateur</div>
+          </aside>
         </div>
 
-        <div class="grid">
-          <article class="box">
-            <h3>À propos</h3>
-            <p>
-              Je suis passionné par le développement, la création et l'apprentissage
-              continu. Ce site me permet de présenter mon travail et d'explorer de nouveaux projets.
-            </p>
-          </article>
+        <section style="margin-top:28px">
+          <h2>Compétences</h2>
+          <div class="skills">
+            <span class="skill">HTML</span>
+            <span class="skill">CSS</span>
+            <span class="skill">JavaScript</span>
+            <span class="skill">Git</span>
+            <span class="skill">Node.js</span>
+            <span class="skill">Static sites</span>
+          </div>
+        </section>
 
-          <article class="box">
-            <h3>Projets</h3>
-            <p>
-              Ici, je peux mettre en avant des idées, des démonstrations, des prototypes
-              ou des réalisations qui méritent d'être partagées avec le monde.
-            </p>
-          </article>
-
-          <article class="box">
-            <h3>Contact</h3>
-            <p>
-              Vous pouvez me retrouver sur GitHub :
-              <a href="https://github.com/lane27">github.com/lane27</a>
-            </p>
-          </article>
-        </div>
+        <section id="contact" style="margin-top:22px">
+          <h2>Contact</h2>
+          <p>Pour me contacter ou voir mon travail :</p>
+          <ul class="contact-list">
+            <li>GitHub : <a href="https://github.com/lane27">github.com/lane27</a></li>
+            <li>PR ou issue sur ce dépôt pour proposer des modifications</li>
+          </ul>
+        </section>
 
         <footer>
-          Ce site sert de base de départ pour un portfolio personnel ou un projet web évolutif.
+          Cette version ajoute une photo, une section Compétences et un bouton d'appel à l'action pour faciliter le contact. Remplacez l'avatar par votre image si vous le souhaitez.
         </footer>
       </section>
     </main>
